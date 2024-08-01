@@ -10,7 +10,37 @@ model = load_model(model_path)
 
 # Define class labels based on test output
 class_labels = {
+    'A': 0,
+    'B': 1,
+    'C': 2,
+    'D': 3,
+    'E': 4,
+    'F': 5,
+    'G': 6,
+    'H': 7,
+    'I': 8,
+    'J': 9,
+    'K': 10,
+    'L': 11,
+    'M': 12,
+    'N': 13,
+    'O': 14,
+    'P': 15,
+    'Q': 16,
+    'R': 17,
+    'S': 18,
+    'T': 19,
+    'U': 20,
+    'V': 21,
+    'W': 22,
+    'X': 23,
+    'Y': 24,
+    'Z': 25,
+    'del': 26,
+    'nothing': 27,
+    'space': 28
 }
+
 
 def predict_frame(frame, model, class_labels):
     try:
@@ -26,6 +56,7 @@ def predict_frame(frame, model, class_labels):
     except Exception as e:
         print(f"Error processing frame: {e}")
         return "Error"
+
 
 # Streamlit webpage title
 st.title('ASL Recognition using Webcam')
@@ -44,7 +75,7 @@ while cap.isOpened():
 
     # Display the camera feed
     FRAME_WINDOW.image(frame, channels="BGR")
-    
+
     # Display the prediction
     st.write('Predicted Sign Language: ', predicted_class)
 
