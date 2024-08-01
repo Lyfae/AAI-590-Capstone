@@ -4,3 +4,4 @@ asl_alphabet_train.zip
 asl_alphabet_test.zip
 ChatBot/gpt2-fine-tuned/
 model/
+asl_env/
