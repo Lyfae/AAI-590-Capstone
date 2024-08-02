@@ -1,87 +1,69 @@
 import streamlit as st
-import cv2
 import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import img_to_array
+import tensorflow as tf
+from PIL import Image
 
-# Load the model
+# Load the model using keras directly from tensorflow namespace
 model_path = '../ASL/best_model_2.h5'
-model = load_model(model_path)
+model = tf.keras.models.load_model(model_path, compile=False)
 
 # Define class labels based on test output
 class_labels = {
-    'A': 0,
-    'B': 1,
-    'C': 2,
-    'D': 3,
-    'E': 4,
-    'F': 5,
-    'G': 6,
-    'H': 7,
-    'I': 8,
-    'J': 9,
-    'K': 10,
-    'L': 11,
-    'M': 12,
-    'N': 13,
-    'O': 14,
-    'P': 15,
-    'Q': 16,
-    'R': 17,
-    'S': 18,
-    'T': 19,
-    'U': 20,
-    'V': 21,
-    'W': 22,
-    'X': 23,
-    'Y': 24,
-    'Z': 25,
-    'del': 26,
-    'nothing': 27,
-    'space': 28
+    0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E',
+    5: 'F', 6: 'G', 7: 'H', 8: 'I', 9: 'J',
+    10: 'K', 11: 'L', 12: 'M', 13: 'N', 14: 'O',
+    15: 'P', 16: 'Q', 17: 'R', 18: 'S', 19: 'T',
+    20: 'U', 21: 'V', 22: 'W', 23: 'X', 24: 'Y',
+    25: 'Z', 26: 'del', 27: 'nothing', 28: 'space'
 }
 
+def process_image(frame):
+    img = Image.open(frame).convert('L')
+    img = img.resize((64, 64))
+    img_array = np.array(img) / 255.0  # Normalize the image
+    img_array = np.expand_dims(img_array, axis=(0, -1))  # Add batch and channel dimensions
+    return img_array
 
 def predict_frame(frame, model, class_labels):
     try:
-        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
-        img = cv2.resize(img, (64, 64))  # Resize to model expected size
-        img_array = img_to_array(img) / 255.0  # Normalize the image
-        img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
-
+        img_array = process_image(frame)
         predictions = model.predict(img_array)
         predicted_class_index = np.argmax(predictions, axis=1)[0]
         predicted_class = class_labels[predicted_class_index]
         return predicted_class
     except Exception as e:
-        print(f"Error processing frame: {e}")
+        st.error(f"Error processing frame: {e}")
         return "Error"
 
-
-# Streamlit webpage title
 st.title('ASL Recognition using Webcam')
 
-# Setting up the webcam
-FRAME_WINDOW = st.image([])
-cap = cv2.VideoCapture(0)
+# Initialize session state to store the recognized string
+if 'recognized_string' not in st.session_state:
+    st.session_state['recognized_string'] = ""
 
-while cap.isOpened():
-    ret, frame = cap.read()
-    if not ret:
-        continue
+# Setup the webcam capture
+cap = st.camera_input("Capture", key="cam")
 
-    # Make predictions on the current frame
-    predicted_class = predict_frame(frame, model, class_labels)
-
-    # Display the camera feed
-    FRAME_WINDOW.image(frame, channels="BGR")
-
-    # Display the prediction
+if cap:
+    # If a frame is captured, predict the class
+    predicted_class = predict_frame(cap, model, class_labels)
+    
+    # If 'del' is predicted, remove the last character
+    if predicted_class == 'del':
+        st.session_state['recognized_string'] = st.session_state['recognized_string'][:-1]
+    elif predicted_class == 'space':
+        st.session_state['recognized_string'] += ' '
+    elif predicted_class != 'nothing':
+        st.session_state['recognized_string'] += predicted_class
+    
     st.write('Predicted Sign Language: ', predicted_class)
+    st.write('Recognized String: ', st.session_state['recognized_string'])
 
-    # Break the loop with a button in Streamlit
-    if st.button('Stop'):
-        break
+# To reset the recognized string
+if st.button('Reset'):
+    st.session_state['recognized_string'] = ""
+    st.write('Recognized String has been reset.')
 
-# Release the camera and close all windows
-cap.release()
+# To stop using the webcam
+if st.button('Stop'):
+    st.write("Webcam stopped.")
