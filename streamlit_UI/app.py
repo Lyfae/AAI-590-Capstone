@@ -1,11 +1,22 @@
 import streamlit as st
 import numpy as np
 import tensorflow as tf
+import torch
 from PIL import Image
+from peft import PeftModel
+from transformers import GenerationConfig, AutoModelForSeq2SeqLM, AutoTokenizer
 
 # Load the model using keras directly from tensorflow namespace
-model_path = '../ASL/best_model_2.h5'
+model_path = '../ASL/best_model_3.h5'
 model = tf.keras.models.load_model(model_path, compile=False)
+
+peft_model_base = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-base", torch_dtype=torch.bfloat16)
+tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-base")
+
+peft_model = PeftModel.from_pretrained(peft_model_base,
+                                       '../flan_t5/peft-conversation-checkpoint-local',
+                                       torch_dtype=torch.bfloat16,
+                                       is_trainable=False)
 
 # Define class labels based on test output
 class_labels = {
@@ -16,6 +27,14 @@ class_labels = {
     20: 'U', 21: 'V', 22: 'W', 23: 'X', 24: 'Y',
     25: 'Z', 26: 'del', 27: 'nothing', 28: 'space'
 }
+
+def insert_prompt(prompt):
+    input_ids = tokenizer(prompt, return_tensors="pt").input_ids 
+
+    peft_model_outputs = peft_model.generate(input_ids=input_ids, generation_config=GenerationConfig(max_new_tokens=200, num_beams=1))
+    peft_model_text_output = tokenizer.decode(peft_model_outputs[0], skip_special_tokens=True)
+
+    return peft_model_text_output
 
 def process_image(frame):
     img = Image.open(frame).convert('L')
@@ -59,11 +78,26 @@ if cap:
     st.write('Predicted Sign Language: ', predicted_class)
     st.write('Recognized String: ', st.session_state['recognized_string'])
 
-# To reset the recognized string
-if st.button('Reset'):
-    st.session_state['recognized_string'] = ""
-    st.write('Recognized String has been reset.')
+
+
+# Create columns for buttons
+col1, col2 = st.columns(2)
+# Buttons
+with col1:
+    # To reset the recognized string    
+    if st.button('Reset'):
+        st.session_state['recognized_string'] = ""
+        st.write('Recognized String has been reset.')
+with col2:
+    # To stop using the webcam
+    if st.button('BackSpace'):
+        st.session_state['recognized_string'] = st.session_state['recognized_string'][:-1]
 
 # To stop using the webcam
 if st.button('Stop'):
     st.write("Webcam stopped.")
+
+if st.button('Ask Bot'):
+    prompt = st.session_state['recognized_string']
+    st.write("User's Prompt: ", prompt)
+    st.write("Bot's Repsonse: ", insert_prompt(prompt))
