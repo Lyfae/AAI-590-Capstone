@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import os
 import tensorflow as tf
 import torch
 from PIL import Image
@@ -17,6 +18,9 @@ peft_model = PeftModel.from_pretrained(peft_model_base,
                                        '../flan_t5/peft-conversation-checkpoint-local',
                                        torch_dtype=torch.bfloat16,
                                        is_trainable=False)
+
+# Image path
+image_path = './images'
 
 # Define class labels based on test output
 class_labels = {
@@ -54,6 +58,28 @@ def predict_frame(frame, model, class_labels):
         st.error(f"Error processing frame: {e}")
         return "Error"
 
+def text_to_images(response, path):
+    # Take the response string, make it into a list and capitalize it
+    response = list(response.upper())
+
+    # Empty list to hold the images
+    images = []
+
+    # Iterate through the responses and look for the files associated with the name
+    for char in response:
+        if char == ' ':
+            char = 'space'
+        image_name = f"{char}.jpg"
+        image_path = os.path.join(path,image_name)
+
+        # If file exists, append to our list
+        if os.path.isfile(image_path):
+            images.append(image_path)
+        else:
+            print("File was not found in path")
+
+    return images
+
 st.title('ASL Recognition using Webcam')
 
 # Initialize session state to store the recognized string
@@ -79,7 +105,6 @@ if cap:
     st.write('Recognized String: ', st.session_state['recognized_string'])
 
 
-
 # Create columns for buttons
 col1, col2 = st.columns(2)
 # Buttons
@@ -91,13 +116,16 @@ with col1:
 with col2:
     # To stop using the webcam
     if st.button('BackSpace'):
-        st.session_state['recognized_string'] = st.session_state['recognized_string'][:-1]
+        st.session_state['recognized_string'][:-1]
 
 # To stop using the webcam
 if st.button('Stop'):
     st.write("Webcam stopped.")
 
 if st.button('Ask Bot'):
-    prompt = st.session_state['recognized_string']
-    st.write("User's Prompt: ", prompt)
-    st.write("Bot's Repsonse: ", insert_prompt(prompt))
+    st.write("User's Prompt: ", "What is the capital of california") # change this to st.session_state['recognized_string'] later
+    answer = insert_prompt("What is the capital of california") # change this to st.session_state['recognized_string'] later
+    st.write("Bot's Repsonse: ", answer)
+    visual_answer = text_to_images(answer, image_path)
+    st.image(visual_answer, width=100)
+    
