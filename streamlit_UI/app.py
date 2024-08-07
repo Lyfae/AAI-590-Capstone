@@ -69,6 +69,7 @@ def text_to_images(response, path):
     for char in response:
         if char == ' ':
             char = 'space'
+            
         image_name = f"{char}.jpg"
         image_path = os.path.join(path,image_name)
 
@@ -106,7 +107,7 @@ if cap:
 
 
 # Create columns for buttons
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 # Buttons
 with col1:
     # To reset the recognized string    
@@ -116,15 +117,22 @@ with col1:
 with col2:
     # To stop using the webcam
     if st.button('BackSpace'):
-        st.session_state['recognized_string'][:-1]
+        st.session_state['recognized_string'] = st.session_state['recognized_string'][:-1]
+with col3:
+    # To add a quesiton mark at the end of the sentence
+    if st.button('Question Mark'):
+        st.session_state['recognized_string'] += '?'
+
+# Update the String
+st.write("Updated String: ", st.session_state['recognized_string'])
 
 # To stop using the webcam
 if st.button('Stop'):
     st.write("Webcam stopped.")
 
 if st.button('Ask Bot'):
-    st.write("User's Prompt: ", "What is the capital of california") # change this to st.session_state['recognized_string'] later
-    answer = insert_prompt("What is the capital of california") # change this to st.session_state['recognized_string'] later
+    st.write("User's Prompt: ", st.session_state['recognized_string']) 
+    answer = insert_prompt(st.session_state['recognized_string']) 
     st.write("Bot's Repsonse: ", answer)
     visual_answer = text_to_images(answer, image_path)
     st.image(visual_answer, width=100)
