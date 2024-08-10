@@ -120,6 +120,6 @@ if st.button('Stop'):
 if st.button('Ask Bot'):
     st.write("User's Prompt: ", st.session_state['recognized_string'])
     answer = insert_prompt(st.session_state['recognized_string'])
-    st.write("Bot's Response: ", answer)
+    st.write("Bot's Response: ", answer.lower())
     visual_answer = text_to_images(answer, image_path)
     st.image(visual_answer, width=100)
