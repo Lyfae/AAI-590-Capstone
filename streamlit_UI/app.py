@@ -114,9 +114,6 @@ with col3:
 st.write("Updated String: ", st.session_state['recognized_string'])
 
 # Additional controls for user interaction
-if st.button('Stop'):
-    st.write("Webcam stopped.")
-
 if st.button('Ask Bot'):
     st.write("User's Prompt: ", st.session_state['recognized_string'])
     answer = insert_prompt(st.session_state['recognized_string'].lower())
