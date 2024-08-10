@@ -70,7 +70,7 @@ requirements.txt: A file listing all the dependencies required to run the projec
 
 ## How It Works
 ### ASL Recognition: 
-The application processes video input from the webcam, recognizes ASL signs, and translates them into text.
+The application processes video input from the webcam, recognizes ASL signs, and translates them into text. Please ensure the image is cleared before utilizing any other buttons. 
 ### Text Handling: 
 The recognized text can be edited via the application's interface, allowing users to correct or modify the output.
 ### Interaction: 
