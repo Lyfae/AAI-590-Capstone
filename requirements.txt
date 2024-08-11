@@ -1,4 +1,6 @@
 streamlit
+torch
 tensorflow
-numpy
-Pillow
+transformers
+huggingface_hub
+peft

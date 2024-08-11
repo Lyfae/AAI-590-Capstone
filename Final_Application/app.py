@@ -9,7 +9,7 @@ from peft import PeftModel  # PEFT library for fine-tuned language models
 from transformers import GenerationConfig, AutoModelForSeq2SeqLM, AutoTokenizer  # Hugging Face's transformers for NLP models
 
 # Load the TensorFlow Keras model from the specified path without compiling
-model_path = '../ASL/asl_cnn_model.h5'
+model_path = '../CNN_Model/asl_cnn_model.h5'
 model = tf.keras.models.load_model(model_path, compile=False)
 
 # Load a sequence-to-sequence language model and tokenizer from Hugging Face
@@ -18,7 +18,7 @@ tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-base")
 
 # Configure and load a fine-tuned version of the PEFT model with non-trainable parameters
 peft_model = PeftModel.from_pretrained(peft_model_base,
-                                       '../flan_t5/peft-conversation-checkpoint-local',
+                                       '../Fine-Tuned_Flan-T5-Base_Model/peft-conversation-checkpoint-local',
                                        torch_dtype=torch.bfloat16,
                                        is_trainable=False)
 
