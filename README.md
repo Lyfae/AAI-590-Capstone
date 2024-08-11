@@ -1,7 +1,7 @@
 # AAI-590-Captstone
 
 ## Overview
-This project is designed to provide an interactive web application for American Sign Language (ASL) recognition using a webcam. The application is built using Streamlit and integrates machine learning models from TensorFlow and language models from Hugging Face's Transformers library. Users can capture ASL signs via a webcam, and the application will predict and display the corresponding alphabet or action.
+This project aims at developing an application able to elaborate live sign language questions and return both textual and sign language answers on general topics, thereby offering communication support to deaf and dumb individuals.
 
 ## Getting Started
 Follow these instructions to set up the project environment and run the application on your local machine.
